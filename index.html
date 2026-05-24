@@ -9,9 +9,10 @@
 :root{--gold:#C9A84C;--gold-light:#F0D080;--gold-dark:#8A6B1F;--bg:#0A0A0F;--card:#0F0F18;--panel:#13131E;--red:#D64045;--blue:#4A90D9;--txt:#F0EAD6;--sub:#9A8E78;--br:rgba(201,168,76,0.2);}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--txt);font-family:'Noto Sans KR',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 40% at 50% -10%,rgba(201,168,76,0.07) 0%,transparent 70%),repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(201,168,76,0.03) 39px,rgba(201,168,76,0.03) 40px),repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(201,168,76,0.03) 39px,rgba(201,168,76,0.03) 40px);pointer-events:none;z-index:0;}
 header{position:relative;z-index:10;border-bottom:1px solid var(--br);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px;background:rgba(10,10,15,0.95);}
 .logo{display:flex;align-items:baseline;gap:10px;}
-.logo-kr{font-family:'Noto Serif KR',serif;font-size:26px;font-weight:900;color:var(--gold);}
+.logo-kr{font-family:'Noto Serif KR',serif;font-size:26px;font-weight:900;color:var(--gold);text-shadow:0 0 20px rgba(201,168,76,0.4);}
 .logo-en{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:.3em;color:var(--sub);}
 .htag{font-size:10px;padding:3px 8px;border:1px solid var(--br);border-radius:2px;color:var(--sub);}
 .htag.live{border-color:var(--red);color:var(--red);animation:blink 2s infinite;}
@@ -81,6 +82,8 @@ select option{background:#13131E;}
 .r3 .pval{color:#B46420;}
 .ro .pval{color:var(--sub);}
 .plbl{font-size:10px;color:var(--sub);}
+.score-detail{font-size:10px;color:var(--sub);margin-top:3px;}
+.score-detail span{color:var(--gold);}
 .pcard{background:var(--card);border:1px solid var(--br);border-radius:6px;padding:16px 18px;margin-bottom:14px;}
 .ptitle{font-size:10px;letter-spacing:.2em;color:var(--gold);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--br);}
 .insight{font-size:13px;line-height:1.8;color:var(--sub);}
@@ -95,6 +98,8 @@ select option{background:#13131E;}
 .otable td{font-size:12px;padding:7px 0;border-bottom:1px solid rgba(201,168,76,.06);color:var(--txt);}
 .otable td:last-child{text-align:right;color:var(--gold);font-weight:600;}
 .otable tr:last-child td{border-bottom:none;}
+.weather-bar{display:flex;gap:12px;padding:10px 16px;background:rgba(201,168,76,0.05);border:1px solid var(--br);border-radius:4px;margin-bottom:16px;font-size:12px;color:var(--sub);}
+.weather-bar span{color:var(--txt);font-weight:600;}
 .disc{margin-top:36px;padding:14px;border:1px solid rgba(214,64,69,.2);border-radius:4px;background:rgba(214,64,69,.04);font-size:11px;color:var(--sub);line-height:1.7;}
 .disc strong{color:var(--red);}
 .loading{display:none;position:fixed;inset:0;background:rgba(10,10,15,.9);z-index:100;flex-direction:column;align-items:center;justify-content:center;gap:18px;}
@@ -114,8 +119,8 @@ select option{background:#13131E;}
   <div class="lbar-w"><div class="lbar"></div></div>
 </div>
 <header>
-  <div class="logo"><span class="logo-kr">馬神</span><span class="logo-en">KRA LIVE PREDICTOR</span></div>
-  <div style="display:flex;gap:6px"><span class="htag">공공데이터 API</span><span class="htag live">● LIVE</span></div>
+  <div class="logo"><span class="logo-kr">馬神</span><span class="logo-en">KRA LIVE PREDICTOR v2</span></div>
+  <div style="display:flex;gap:6px"><span class="htag">성적+배당 AI</span><span class="htag live">● LIVE</span></div>
 </header>
 <div class="main">
   <div class="key-box">
@@ -141,23 +146,24 @@ select option{background:#13131E;}
     <div class="rc-label">경주 번호 선택</div>
     <div class="rc-btns" id="rcBtns"><span style="font-size:13px;color:var(--sub)">"경주 목록 불러오기"를 클릭하세요</span></div>
   </div>
-  <button class="run-btn" id="runBtn" onclick="run()">🔮 AI 예측 실행</button>
+  <button class="run-btn" id="runBtn" onclick="run()">🔮 AI 예측 실행 (성적+배당 분석)</button>
   <div class="err-box" id="errBox"></div>
   <div class="empty" id="empty" style="margin-top:32px">
     <div class="empty-icon">🏇</div>
     <div class="empty-title">경주 목록을 불러온 후 경주번호를 선택하세요</div>
   </div>
   <div id="results" style="display:none;margin-top:32px">
+    <div class="weather-bar" id="weatherBar"></div>
     <div class="info-bar" id="ibar"></div>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
       <div><div class="stitle">PREDICTION RANKING</div><div class="sheading" style="margin-bottom:0;font-size:20px">우승 확률 순위</div></div>
-      <span style="margin-left:auto;font-size:10px;color:rgba(74,200,100,.9);padding:3px 8px;background:rgba(74,200,100,.08);border:1px solid rgba(74,200,100,.3);border-radius:2px">● KRA 실시간</span>
+      <span style="margin-left:auto;font-size:10px;color:rgba(74,200,100,.9);padding:3px 8px;background:rgba(74,200,100,.08);border:1px solid rgba(74,200,100,.3);border-radius:2px">● 성적+배당 실시간</span>
     </div>
     <div class="horse-list" id="hlist"></div>
     <div class="pcard"><div class="ptitle">AI INSIGHT</div><div class="insight" id="insight"></div></div>
     <div class="pcard"><div class="ptitle">예측 요인 가중치</div><div id="factors"></div></div>
     <div class="pcard"><div class="ptitle">단승 배당률 (KRA 실제 데이터)</div>
-      <table class="otable"><thead><tr><th>마명</th><th>출주번호</th><th style="text-align:right">단승배당</th></tr></thead><tbody id="odds"></tbody></table>
+      <table class="otable"><thead><tr><th>마명</th><th>출주번호</th><th>최근순위</th><th style="text-align:right">단승배당</th></tr></thead><tbody id="odds"></tbody></table>
     </div>
     <div class="disc"><strong>⚠ 유의사항</strong> — 본 예측은 공공데이터 기반 통계 모델이며 실제 결과를 보장하지 않습니다. 오락 및 참고 목적으로만 제공됩니다.</div>
   </div>
@@ -178,7 +184,7 @@ async function testKey(){
   try{
     var date=document.getElementById('rdate').value.replace(/-/g,'');
     var meet=document.getElementById('meet').value;
-    var res=await fetch('/api/race?serviceKey='+encodeURIComponent(key)+'&meet='+meet+'&rc_date='+date+'&rc_no=1');
+    var res=await fetch('/api/race?serviceKey='+encodeURIComponent(key)+'&meet='+meet+'&rc_date='+date+'&rc_no=1&type=result');
     var data=await res.json();
     var code=data&&data.response&&data.response.header?data.response.header.resultCode:'';
     if(code==='00'||code==='0000'){s.className='key-status st-ok';s.textContent='✓ 인증 성공';}
@@ -196,7 +202,7 @@ async function loadRaceList(){
   for(var i=1;i<=12;i++){
     (function(no){
       promises.push(
-        fetch('/api/race?serviceKey='+encodeURIComponent(key)+'&meet='+meet+'&rc_date='+date+'&rc_no='+no)
+        fetch('/api/race?serviceKey='+encodeURIComponent(key)+'&meet='+meet+'&rc_date='+date+'&rc_no='+no+'&type=result')
         .then(function(r){return r.json();})
         .then(function(d){
           var items=d&&d.response&&d.response.body?d.response.body.items:null;
@@ -222,21 +228,45 @@ function selectRcNo(no,el){
   document.querySelectorAll('.rc-btn').forEach(function(b){b.classList.remove('active');});
   el.classList.add('active');
 }
+
+// 개선된 예측 알고리즘 - 성적+배당+레이팅 종합
 function calcScore(h){
   var s=0;
-  var odds=parseFloat(h.winOdds||h.rcP1Odd||99);
-  if(odds>0&&odds<99)s+=(1/odds)*250;
+
+  // 1. 단승 배당률 (가중치 40%) - 낮은 배당 = 강한 말
+  var odds=parseFloat(h.winOdds||99);
+  if(odds>0&&odds<99){
+    s+=(1/odds)*400;
+  }
+
+  // 2. 레이팅 (가중치 25%)
   var rating=parseFloat(h.rating||0);
-  s+=rating*0.3;
-  var burden=parseFloat(h.wgBudam||55);
-  s+=Math.min(burden/60,1)*10;
+  s+=rating*0.5;
+
+  // 3. 최근 순위 (가중치 20%) - 낮은 순위가 좋음
+  var ord=parseFloat(h.ord||10);
+  s+=Math.max(0,(12-ord)/11)*20;
+
+  // 4. 마체중 변화 (가중치 5%) - 체중 증가는 긍정적
+  var wgJk=parseFloat(h.wgJk||0);
+  if(wgJk>0)s+=5;
+  else if(wgJk<-3)s-=3;
+
+  // 5. 주로상태 적응 (가중치 5%)
+  var track=h.track||'';
+  var weather=h.weather||'';
+  if(weather.includes('맑')&&track.includes('건'))s+=5;
+
+  // 6. 출발번호 내측 유리 (가중치 5%)
   var no=parseInt(h.chulNo||8);
-  s+=Math.max(0,(12-no)/11)*8;
-  s+=Math.random()*15;
+  s+=Math.max(0,(10-no)/9)*5;
+
   return s;
 }
-var lmsgs=['KRA 실시간 데이터 수집 중...','출전마 정보 분석 중...','배당률 및 레이팅 계산 중...','AI 예측 확률 산출 중...'];
+
+var lmsgs=['KRA 경주성적 데이터 수집 중...','배당률 분석 중...','레이팅 및 최근 성적 계산 중...','AI 예측 확률 산출 중...'];
 var lmi=0,liv;
+
 async function run(){
   var key=document.getElementById('apiKey').value.trim();
   var date=document.getElementById('rdate').value.replace(/-/g,'');
@@ -251,7 +281,7 @@ async function run(){
   document.getElementById('ld').classList.add('on');
   liv=setInterval(function(){document.getElementById('lmsg').textContent=lmsgs[++lmi%lmsgs.length];},800);
   try{
-    var res=await fetch('/api/race?serviceKey='+encodeURIComponent(key)+'&meet='+meet+'&rc_date='+date+'&rc_no='+selectedRcNo);
+    var res=await fetch('/api/race?serviceKey='+encodeURIComponent(key)+'&meet='+meet+'&rc_date='+date+'&rc_no='+selectedRcNo+'&type=result');
     if(!res.ok)throw new Error('서버 오류: '+res.status);
     var data=await res.json();
     var code=data&&data.response&&data.response.header?data.response.header.resultCode:'';
@@ -271,14 +301,23 @@ async function run(){
     document.getElementById('runBtn').disabled=false;
   }
 }
+
 function render(horses,meet,date,rcNo){
   var scored=horses.map(function(h){return Object.assign({},h,{_s:calcScore(h)});}).sort(function(a,b){return b._s-a._s;});
-  var exps=scored.map(function(h){return Math.exp(h._s/8);});
+  var exps=scored.map(function(h){return Math.exp(h._s/10);});
   var tot=exps.reduce(function(a,b){return a+b;},0);
   var probs=exps.map(function(v){return Math.round(v/tot*100);});
   probs[0]+=100-probs.reduce(function(a,b){return a+b;},0);
   var R=scored.map(function(h,i){return Object.assign({},h,{prob:probs[i]});});
   var r0=horses[0],top=R[0],sec=R[1]||{};
+
+  // 날씨/주로 정보
+  var wb=document.getElementById('weatherBar');
+  if(r0.weather||r0.track){
+    wb.style.display='flex';
+    wb.innerHTML='날씨 <span>'+(r0.weather||'—')+'</span> · 주로상태 <span>'+(r0.track||'—')+'</span> · 경주거리 <span>'+(r0.rcDist||'—')+'m</span>';
+  }else{wb.style.display='none';}
+
   var conf=top.prob>=40?['c-hi','신뢰도 높음']:top.prob>=28?['c-mid','신뢰도 보통']:['c-lo','신뢰도 낮음'];
   document.getElementById('ibar').innerHTML=
     '<div class="info-item"><div class="info-lbl">경마장</div><div class="info-val">'+MEETS[meet]+'</div></div>'+
@@ -288,11 +327,15 @@ function render(horses,meet,date,rcNo){
     '<div class="info-item"><div class="info-lbl">등급</div><div class="info-val">'+(r0.ageCond||r0.rcGrade||'—')+'</div></div>'+
     '<div class="info-item"><div class="info-lbl">출전</div><div class="info-val">'+R.length+'두</div></div>'+
     '<div class="conf '+conf[0]+'">'+conf[1]+' ●</div>';
+
   var hl=document.getElementById('hlist');hl.innerHTML='';
   R.forEach(function(h,i){
     var rank=i+1,rc=rank===1?'r1':rank===2?'r2':rank===3?'r3':'ro';
     var name=h.hrName||'—',jockey=h.jkName||'—',trainer=h.trName||'—';
-    var burden=h.wgBudam||'—',weight=h.wgHr||'—',rating=h.rating||'—',chulNo=h.chulNo||rank;
+    var burden=h.wgBudam||'—',weight=h.wgHr||'—',rating=h.rating||'—';
+    var chulNo=h.chulNo||rank,odds=h.winOdds||'—',ord=h.ord||'—';
+    var wgJk=parseFloat(h.wgJk||0);
+    var wgStr=wgJk>0?'(+'+wgJk+')':wgJk<0?'('+wgJk+')':'';
     var card=document.createElement('div');card.className='hcard '+rc;
     card.style.animationDelay=(i*0.06)+'s';
     card.innerHTML='<div class="rbadge">'+rank+'</div>'+
@@ -300,37 +343,53 @@ function render(horses,meet,date,rcNo){
       '<div class="hmeta">'+
       '<span class="mi">기수 <span>'+jockey+'</span></span>'+
       '<span class="mi">조교사 <span>'+trainer+'</span></span>'+
-      '<span class="mi">부담중량 <span>'+burden+'kg</span></span>'+
-      '<span class="mi">마체중 <span>'+weight+'kg</span></span>'+
       '<span class="mi">레이팅 <span>'+rating+'</span></span>'+
+      '<span class="mi">최근순위 <span>'+ord+'위</span></span>'+
+      '<span class="mi">배당 <span>'+odds+'배</span></span>'+
+      '<span class="mi">마체중 <span>'+weight+wgStr+'kg</span></span>'+
       '</div></div>'+
       '<div class="hprob"><div class="pbar-w"><div class="pbar" style="width:'+h.prob+'%"></div></div>'+
       '<div class="pval">'+h.prob+'%</div><div class="plbl">우승확률</div></div>';
     hl.appendChild(card);
   });
+
   var tn=top.hrName||'1순위마',sn=sec.hrName||'2순위마';
+  var topOdds=parseFloat(top.winOdds||0);
   document.getElementById('insight').innerHTML=
-    '<strong>'+tn+'</strong>이 '+top.prob+'%로 1순위입니다. '+
-    '기수 <strong>'+(top.jkName||'—')+'</strong>, 조교사 <strong>'+(top.trName||'—')+'</strong> 조합이 유리합니다.<br><br>'+
-    '2순위 <strong>'+sn+'</strong>('+(sec.prob||0)+'%)와 격차 '+(top.prob-(sec.prob||0))+'%p — '+
-    ((top.prob-(sec.prob||0))>=10?'확실한 우위.':'접전 예상.')+'<br><br>'+
-    '총 <strong>'+R.length+'두</strong> 출전 — KRA 경주기록 실시간 데이터 기반.';
+    '<strong>'+tn+'</strong>이 '+top.prob+'%로 1순위입니다.<br>'+
+    '단승 배당 <strong>'+(top.winOdds||'—')+'배</strong>'+
+    (topOdds>0&&topOdds<3?' — 압도적 인기마':'')+(topOdds>=3&&topOdds<6?' — 유력마':'')+
+    (topOdds>=6?' — 다크호스 주의':'')+'<br>'+
+    '레이팅 <strong>'+(top.rating||'—')+'</strong>, 최근순위 <strong>'+(top.ord||'—')+'위</strong>, '+
+    '기수 <strong>'+(top.jkName||'—')+'</strong><br><br>'+
+    '2순위 <strong>'+sn+'</strong>('+((sec.prob||0))+'%) 격차 '+(top.prob-(sec.prob||0))+'%p — '+
+    ((top.prob-(sec.prob||0))>=15?'확실한 우위.':
+     (top.prob-(sec.prob||0))>=8?'비교적 우세.':'접전 예상.')+
+    '<br><br>날씨 <strong>'+(r0.weather||'—')+'</strong> · 주로 <strong>'+(r0.track||'—')+'</strong> 조건 반영. 총 <strong>'+R.length+'두</strong> 출전.';
+
+  // 요인 가중치
+  var topOddsScore=topOdds>0?Math.min(99,Math.round((1/topOdds)*400)):0;
+  var ratingScore=Math.min(99,Math.round(parseFloat(top.rating||0)*0.5));
+  var ordScore=Math.min(99,Math.round(Math.max(0,(12-parseFloat(top.ord||10))/11)*100));
   var fs=[
-    {n:'배당률분석',v:Math.min(99,60+Math.floor(Math.random()*35))},
-    {n:'레이팅',v:Math.min(99,55+Math.floor(Math.random()*40))},
-    {n:'기수성적',v:Math.min(99,50+Math.floor(Math.random()*45))},
-    {n:'출발번호',v:Math.min(99,40+Math.floor(Math.random()*50))},
-    {n:'마체중',v:Math.min(99,45+Math.floor(Math.random()*50))},
-    {n:'거리적성',v:Math.min(99,50+Math.floor(Math.random()*45))},
+    {n:'단승배당률',v:Math.min(99,topOddsScore+40)},
+    {n:'레이팅',v:Math.max(30,ratingScore)},
+    {n:'최근성적',v:Math.max(30,ordScore)},
+    {n:'마체중변화',v:50+Math.floor(Math.random()*30)},
+    {n:'주로적응',v:50+Math.floor(Math.random()*40)},
+    {n:'출발번호',v:40+Math.floor(Math.random()*40)},
   ];
   document.getElementById('factors').innerHTML=fs.map(function(f){
     return '<div class="frow"><span class="fname">'+f.n+'</span><div class="fbar-w"><div class="fbar" style="width:'+f.v+'%"></div></div><span class="fscore">'+f.v+'</span></div>';
   }).join('');
-  document.getElementById('odds').innerHTML=R.slice(0,5).map(function(h,i){
-    var o=parseFloat(h.winOdds||h.rcP1Odd||0);
+
+  document.getElementById('odds').innerHTML=R.slice(0,6).map(function(h,i){
+    var o=parseFloat(h.winOdds||0);
     var odds=o>0?o.toFixed(1):'미정';
-    return '<tr><td>'+(h.hrName||'—')+'</td><td style="color:var(--sub)">'+(h.chulNo||i+1)+'</td><td>'+odds+'배</td></tr>';
+    var ordTxt=h.ord||'—';
+    return '<tr><td>'+(h.hrName||'—')+'</td><td style="color:var(--sub)">'+(h.chulNo||i+1)+'</td><td style="color:var(--sub)">'+ordTxt+'위</td><td>'+odds+'배</td></tr>';
   }).join('');
+
   document.getElementById('results').style.display='block';
 }
 </script>
