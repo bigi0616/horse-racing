@@ -14,10 +14,16 @@ export default async function handler(req, res) {
 
   try {
     const url = `https://apis.data.go.kr/B551015/API214_1/RaceDetailInfo_1?serviceKey=${serviceKey}&numOfRows=20&pageNo=1&meet=${meet}&rc_date=${rc_date}&rc_no=${rc_no}&_type=json`;
-    const response = await fetch(url);
+    
+    const response = await fetch(url, {
+      headers: { 'Accept': 'application/json' }
+    });
+    
     const text = await response.text();
-    const data = JSON.parse(text);
-    return res.status(200).json(data);
+    
+    // 디버그용: 원본 응답 그대로 반환
+    return res.status(200).send(text);
+    
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
