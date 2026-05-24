@@ -13,8 +13,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    const url = `https://apis.data.go.kr/B551015/API214_1/RaceDetailInfo_1?serviceKey=${serviceKey}&numOfRows=20&pageNo=1&meet=${meet}&rc_date=${rc_date}&rc_no=${rc_no}&_type=json`;
-    
+    const url = `https://apis.data.go.kr/B551015/API187/HorseRaceInfo?serviceKey=${serviceKey}&numOfRows=20&pageNo=1&meet=${meet}&rc_date=${rc_date}&rc_no=${rc_no}&_type=json`;
+  
     const response = await fetch(url, {
       headers: { 'Accept': 'application/json' }
     });
