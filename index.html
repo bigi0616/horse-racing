@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>馬神 — 경마 우승마 예측 v3</title>
+<title>馬神 — 경마 우승마 예측 v4</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;900&family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
-:root{--gold:#C9A84C;--gold-light:#F0D080;--gold-dark:#8A6B1F;--bg:#0A0A0F;--card:#0F0F18;--panel:#13131E;--red:#D64045;--blue:#4A90D9;--txt:#F0EAD6;--sub:#9A8E78;--br:rgba(201,168,76,0.2);}
+:root{--gold:#C9A84C;--gold-light:#F0D080;--gold-dark:#8A6B1F;--bg:#0A0A0F;--card:#0F0F18;--panel:#13131E;--red:#D64045;--blue:#4A90D9;--green:#4AC864;--txt:#F0EAD6;--sub:#9A8E78;--br:rgba(201,168,76,0.2);}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--txt);font-family:'Noto Sans KR',sans-serif;min-height:100vh;}
 body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 40% at 50% -10%,rgba(201,168,76,0.07) 0%,transparent 70%),repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(201,168,76,0.03) 39px,rgba(201,168,76,0.03) 40px),repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(201,168,76,0.03) 39px,rgba(201,168,76,0.03) 40px);pointer-events:none;z-index:0;}
@@ -16,6 +16,7 @@ header{position:relative;z-index:10;border-bottom:1px solid var(--br);padding:0 
 .logo-en{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:.3em;color:var(--sub);}
 .htag{font-size:10px;padding:3px 8px;border:1px solid var(--br);border-radius:2px;color:var(--sub);}
 .htag.live{border-color:var(--red);color:var(--red);animation:blink 2s infinite;}
+.htag.ml{border-color:var(--green);color:var(--green);}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}
 .main{max-width:900px;margin:0 auto;padding:28px 16px 80px;position:relative;z-index:1;}
 .key-box{background:var(--card);border:1px solid var(--br);border-radius:8px;padding:18px 20px;margin-bottom:24px;}
@@ -39,8 +40,10 @@ select option{background:#13131E;}
 .rc-btns{display:flex;flex-wrap:wrap;gap:8px;}
 .rc-btn{padding:7px 14px;background:var(--panel);border:1px solid var(--br);border-radius:4px;color:var(--sub);cursor:pointer;font-size:13px;font-family:inherit;}
 .rc-btn.active{background:rgba(201,168,76,.15);border-color:var(--gold);color:var(--gold);font-weight:700;}
-.run-btn{width:100%;background:linear-gradient(135deg,#8A6B1F,#C9A84C);border:none;color:#0A0A0F;font-family:inherit;font-weight:700;font-size:15px;padding:13px;border-radius:4px;cursor:pointer;}
-.run-btn:disabled{opacity:.4;}
+.run-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;}
+.run-btn{width:100%;background:linear-gradient(135deg,#8A6B1F,#C9A84C);border:none;color:#0A0A0F;font-family:inherit;font-weight:700;font-size:14px;padding:13px;border-radius:4px;cursor:pointer;}
+.run-btn.ml{background:linear-gradient(135deg,#1F5A2B,#4AC864);color:#0A0A0F;}
+.run-btn:disabled{opacity:.4;cursor:not-allowed;}
 .err-box{background:rgba(214,64,69,.07);border:1px solid rgba(214,64,69,.4);border-radius:6px;padding:16px;color:#e88;font-size:13px;line-height:1.8;margin-top:16px;display:none;}
 .empty{text-align:center;padding:60px 20px;color:var(--sub);}
 .empty-icon{font-size:56px;margin-bottom:16px;opacity:.4;}
@@ -49,10 +52,6 @@ select option{background:#13131E;}
 .info-item{display:flex;flex-direction:column;gap:2px;}
 .info-lbl{font-size:9px;letter-spacing:.15em;color:var(--sub);}
 .info-val{font-size:13px;font-weight:600;}
-.conf{padding:3px 10px;border-radius:2px;font-size:11px;font-weight:600;margin-left:auto;}
-.c-hi{background:rgba(201,168,76,.15);border:1px solid var(--gold);color:var(--gold);}
-.c-mid{background:rgba(74,144,217,.1);border:1px solid var(--blue);color:var(--blue);}
-.c-lo{background:rgba(214,64,69,.1);border:1px solid var(--red);color:var(--red);}
 .horse-list{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
 .hcard{background:var(--card);border:1px solid var(--br);border-radius:6px;padding:14px 16px;display:grid;grid-template-columns:40px 1fr auto;gap:12px;align-items:center;position:relative;overflow:hidden;animation:si .4s ease both;}
 @keyframes si{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
@@ -84,22 +83,19 @@ select option{background:#13131E;}
 .plbl{font-size:10px;color:var(--sub);}
 .pcard{background:var(--card);border:1px solid var(--br);border-radius:6px;padding:16px 18px;margin-bottom:14px;}
 .ptitle{font-size:10px;letter-spacing:.2em;color:var(--gold);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--br);}
-.insight{font-size:13px;line-height:1.8;color:var(--sub);}
-.insight strong{color:var(--gold);}
-.frow{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
-.fname{font-size:11px;color:var(--sub);width:90px;flex-shrink:0;}
-.fbar-w{flex:1;height:3px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden;}
-.fbar{height:100%;border-radius:2px;background:var(--gold);}
-.fscore{font-size:11px;color:var(--txt);font-weight:500;width:24px;text-align:right;}
+.ptitle.ml{color:var(--green);border-bottom-color:rgba(74,200,100,.3);}
 .otable{width:100%;border-collapse:collapse;}
 .otable th{font-size:10px;color:var(--sub);text-align:left;padding:0 0 7px;border-bottom:1px solid var(--br);}
 .otable td{font-size:12px;padding:7px 0;border-bottom:1px solid rgba(201,168,76,.06);color:var(--txt);}
 .otable td:last-child{text-align:right;color:var(--gold);font-weight:600;}
 .otable tr:last-child td{border-bottom:none;}
-.weather-bar{display:flex;gap:12px;padding:10px 16px;background:rgba(201,168,76,0.05);border:1px solid var(--br);border-radius:4px;margin-bottom:16px;font-size:12px;color:var(--sub);}
-.weather-bar span{color:var(--txt);font-weight:600;}
-.stats-box{background:rgba(74,144,217,0.05);border:1px solid rgba(74,144,217,0.2);border-radius:6px;padding:14px 18px;margin-bottom:16px;font-size:12px;color:var(--sub);line-height:1.8;}
-.stats-box strong{color:var(--blue);}
+.compare-tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.compare-tbl th{font-size:10px;color:var(--sub);text-align:left;padding:6px 8px;border-bottom:1px solid var(--br);}
+.compare-tbl td{padding:9px 8px;border-bottom:1px solid rgba(201,168,76,.06);}
+.compare-tbl tr:last-child td{border-bottom:none;}
+.compare-tbl .pos{font-weight:700;color:var(--gold);}
+.compare-tbl .pos-ml{font-weight:700;color:var(--green);}
+.compare-tbl .agree{background:rgba(201,168,76,.04);}
 .disc{margin-top:36px;padding:14px;border:1px solid rgba(214,64,69,.2);border-radius:4px;background:rgba(214,64,69,.04);font-size:11px;color:var(--sub);line-height:1.7;}
 .disc strong{color:var(--red);}
 .loading{display:none;position:fixed;inset:0;background:rgba(10,10,15,.9);z-index:100;flex-direction:column;align-items:center;justify-content:center;gap:18px;}
@@ -109,35 +105,43 @@ select option{background:#13131E;}
 .lbar-w{width:200px;height:2px;background:rgba(255,255,255,.1);overflow:hidden;}
 .lbar{height:100%;background:linear-gradient(90deg,#8A6B1F,#F0D080);animation:lb 1.8s ease infinite;}
 @keyframes lb{0%{width:0%;margin-left:0%}50%{width:60%;margin-left:20%}100%{width:0%;margin-left:100%}}
+.mode-tabs{display:flex;gap:6px;margin-bottom:14px;}
+.mtab{flex:1;padding:8px;background:var(--panel);border:1px solid var(--br);color:var(--sub);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;border-radius:4px;}
+.mtab.active{background:rgba(201,168,76,.1);border-color:var(--gold);color:var(--gold);}
+.mtab.active.ml{background:rgba(74,200,100,.08);border-color:var(--green);color:var(--green);}
+@media(max-width:600px){.run-row{grid-template-columns:1fr;}.sel-grid{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
 <div class="loading" id="ld">
   <div style="font-size:52px">🐎</div>
-  <div class="ltxt">실시간 경주 데이터 분석 중</div>
+  <div class="ltxt" id="lttl">실시간 경주 데이터 분석 중</div>
   <div class="lsub" id="lmsg">API 호출 중...</div>
   <div class="lbar-w"><div class="lbar"></div></div>
 </div>
 <header>
-  <div class="logo"><span class="logo-kr">馬神</span><span class="logo-en">KRA LIVE PREDICTOR v3</span></div>
-  <div style="display:flex;gap:6px"><span class="htag">통계+성적 AI</span><span class="htag live">● LIVE</span></div>
+  <div class="logo"><span class="logo-kr">馬神</span><span class="logo-en">KRA LIVE PREDICTOR v4</span></div>
+  <div style="display:flex;gap:6px"><span class="htag">통계</span><span class="htag ml">XGBoost</span><span class="htag live">● LIVE</span></div>
 </header>
 <div class="main">
   <div class="key-box">
     <div class="key-label">🔑 공공데이터 API 인증키</div>
     <div class="key-row">
-      <input class="key-input" type="text" id="apiKey" placeholder="인증키를 붙여넣으세요..."/>
+      <input type="password" class="key-input" id="apiKey" placeholder="인증키를 붙여넣으세요...">
       <button class="key-btn" onclick="testKey()">키 확인</button>
       <span class="key-status" id="kst">미입력</span>
     </div>
   </div>
+
   <div class="stitle">RACE CONFIGURATION</div>
   <div class="sheading">경주 선택</div>
   <div class="sel-grid">
-    <div class="sel-group"><label class="sel-label">경마장</label>
+    <div class="sel-group">
+      <div class="sel-label">경마장</div>
       <select id="meet"><option value="1">서울</option><option value="2">제주</option><option value="3">부산경남</option></select>
     </div>
-    <div class="sel-group"><label class="sel-label">경주 일자</label>
+    <div class="sel-group">
+      <div class="sel-label">경주 일자</div>
       <input type="date" id="rdate">
     </div>
   </div>
@@ -146,120 +150,399 @@ select option{background:#13131E;}
     <div class="rc-label">경주 번호 선택</div>
     <div class="rc-btns" id="rcBtns"><span style="font-size:13px;color:var(--sub)">"경주 목록 불러오기"를 클릭하세요</span></div>
   </div>
-  <button class="run-btn" id="runBtn" onclick="run()">🔮 AI 예측 실행 (통계+성적 분석)</button>
+  <div class="run-row">
+    <button class="run-btn" id="runStat" onclick="runStat()">📊 통계 예측</button>
+    <button class="run-btn ml" id="runMl" onclick="runMl()">🧠 XGBoost 예측</button>
+  </div>
   <div class="err-box" id="errBox"></div>
+
   <div class="empty" id="empty" style="margin-top:32px">
     <div class="empty-icon">🏇</div>
     <div class="empty-title">경주 목록을 불러온 후 경주번호를 선택하세요</div>
   </div>
-  <div id="results" style="display:none;margin-top:32px">
-    <div class="weather-bar" id="weatherBar"></div>
-    <div class="stats-box" id="statsBox"></div>
-    <div class="info-bar" id="ibar"></div>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-      <div><div class="stitle">PREDICTION RANKING</div><div class="sheading" style="margin-bottom:0;font-size:20px">우승 확률 순위</div></div>
-      <span style="margin-left:auto;font-size:10px;color:rgba(74,200,100,.9);padding:3px 8px;background:rgba(74,200,100,.08);border:1px solid rgba(74,200,100,.3);border-radius:2px">● 통계+성적 AI</span>
-    </div>
-    <div class="horse-list" id="hlist"></div>
-    <div class="pcard"><div class="ptitle">AI INSIGHT</div><div class="insight" id="insight"></div></div>
-    <div class="pcard"><div class="ptitle">예측 요인 가중치</div><div id="factors"></div></div>
-    <div class="pcard"><div class="ptitle">배당률 및 성적 (KRA 실제 데이터)</div>
-      <table class="otable"><thead><tr><th>마명</th><th>출주번호</th><th>최근순위</th><th>레이팅</th><th style="text-align:right">배당</th></tr></thead><tbody id="odds"></tbody></table>
-    </div>
-    <div class="disc"><strong>⚠ 유의사항</strong> — 본 예측은 공공데이터 기반 통계 모델이며 실제 결과를 보장하지 않습니다. 오락 및 참고 목적으로만 제공됩니다.</div>
-  </div>
-</div>
-<script>
-var selectedRcNo='';
-var MEETS={'1':'서울','2':'제주','3':'부산경남'};
-var historicalStats={oddsWinRate:{},ordWinRate:{},ratingWinRate:{}};
 
-document.getElementById('rdate').value=new Date().toISOString().split('T')[0];
-document.getElementById('apiKey').addEventListener('input',function(){
-  var s=document.getElementById('kst');
-  s.className='key-status';
-  s.textContent=document.getElementById('apiKey').value.trim()?'미확인':'미입력';
+  <div id="results" style="display:none;margin-top:32px">
+    <div class="info-bar" id="ibar"></div>
+
+    <div class="mode-tabs">
+      <button class="mtab active" id="tabStat" onclick="showTab('stat')">📊 통계 예측</button>
+      <button class="mtab ml" id="tabMl" onclick="showTab('ml')">🧠 XGBoost 예측</button>
+      <button class="mtab" id="tabCmp" onclick="showTab('cmp')" style="display:none">↔ 비교</button>
+    </div>
+
+    <div id="paneStat">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <div><div class="stitle">STATISTICAL PREDICTION</div><div class="sheading" style="margin-bottom:0;font-size:18px">통계 기반 우승 확률</div></div>
+        <span style="margin-left:auto;font-size:10px;color:var(--gold);padding:3px 8px;background:rgba(201,168,76,.08);border:1px solid var(--br);border-radius:2px">배당/순위 기반</span>
+      </div>
+      <div class="horse-list" id="hlistStat"></div>
+    </div>
+
+    <div id="paneMl" style="display:none">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <div><div class="stitle" style="color:var(--green)">XGBoost ML PREDICTION</div><div class="sheading" style="margin-bottom:0;font-size:18px">머신러닝 우승 확률</div></div>
+        <span style="margin-left:auto;font-size:10px;color:var(--green);padding:3px 8px;background:rgba(74,200,100,.08);border:1px solid rgba(74,200,100,.3);border-radius:2px">AUC 0.7972</span>
+      </div>
+      <div class="horse-list" id="hlistMl"></div>
+      <div class="pcard"><div class="ptitle ml">XGBOOST INSIGHT</div><div id="insightMl" style="font-size:13px;line-height:1.8;color:var(--sub)"></div></div>
+    </div>
+
+    <div id="paneCmp" style="display:none">
+      <div class="pcard"><div class="ptitle">예측 비교 — 통계 vs XGBoost</div>
+        <table class="compare-tbl">
+          <thead><tr><th>마명</th><th style="text-align:center">통계 순위</th><th style="text-align:center">ML 순위</th><th style="text-align:right">일치</th></tr></thead>
+          <tbody id="cmpBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="pcard"><div class="ptitle">출주표 및 성적 (KRA 공공데이터)</div>
+      <table class="otable"><thead><tr><th>마명</th><th>번호</th><th>최근순위</th><th>레이팅</th><th style="text-align:right">배당</th></tr></thead><tbody id="oddsBody"></tbody></table>
+    </div>
+<script>
+// ============================================================
+// 馬神 v4 — 통계 예측 + XGBoost 병행
+// ============================================================
+var ML_API = 'https://horse-racing-71ha.onrender.com';
+var selectedRcNo = '';
+var lastRaceData = null;
+var lastStat = null;
+var lastMl = null;
+var MEETS = {'1':'서울','2':'제주','3':'부산경남'};
+
+document.getElementById('rdate').value = new Date().toISOString().split('T')[0];
+
+document.getElementById('apiKey').addEventListener('input', function(){
+  var s = document.getElementById('kst');
+  s.className = 'key-status';
+  s.textContent = document.getElementById('apiKey').value.trim() ? '미확인' : '미입력';
 });
 
 async function testKey(){
-  var key=document.getElementById('apiKey').value.trim();
-  if(!key){alert('인증키를 입력하세요.');return;}
-  var s=document.getElementById('kst');s.textContent='확인 중...';
+  var key = document.getElementById('apiKey').value.trim();
+  if(!key){ alert('인증키를 입력하세요.'); return; }
+  var s = document.getElementById('kst');
+  s.textContent = '확인 중...';
   try{
-    var date=document.getElementById('rdate').value.replace(/-/g,'');
-    var meet=document.getElementById('meet').value;
-    var res=await fetch('/api/race?serviceKey='+encodeURIComponent(key)+'&meet='+meet+'&rc_date='+date+'&rc_no=1&type=result');
-    var data=await res.json();
-    var code=data&&data.response&&data.response.header?data.response.header.resultCode:'';
-    if(code==='00'||code==='0000'){s.className='key-status st-ok';s.textContent='✓ 인증 성공';}
-    else{s.className='key-status st-err';s.textContent='✗ 코드:'+code;}
-  }catch(e){s.className='key-status st-err';s.textContent='✗ 오류';}
+    var date = document.getElementById('rdate').value.replace(/-/g,'');
+    var meet = document.getElementById('meet').value;
+    var res = await fetch('/api/race?serviceKey='+encodeURIComponent(key)+'&meet='+meet+'&rc_date='+date+'&rc_no=1&type=result');
+    var data = await res.json();
+    var code = data && data.response && data.response.header ? data.response.header.resultCode : '';
+    if(code==='00' || code==='0000'){
+      s.className='key-status st-ok'; s.textContent='✓ 인증 성공';
+    } else {
+      s.className='key-status st-err'; s.textContent='✗ 코드:'+code;
+    }
+  } catch(e){
+    s.className='key-status st-err'; s.textContent='✗ 오류';
+  }
 }
 
 async function loadRaceList(){
-  var key=document.getElementById('apiKey').value.trim();
-  if(!key){alert('인증키를 먼저 입력하세요.');return;}
-  var date=document.getElementById('rdate').value.replace(/-/g,'');
-  var meet=document.getElementById('meet').value;
-  var container=document.getElementById('rcBtns');
-  container.innerHTML='<span style="color:var(--sub)">경주 목록 확인 중...</span>';
-  var promises=[];
-  for(var i=1;i<=12;i++){
+  var key = document.getElementById('apiKey').value.trim();
+  if(!key){ alert('인증키를 먼저 입력하세요.'); return; }
+  var date = document.getElementById('rdate').value.replace(/-/g,'');
+  var meet = document.getElementById('meet').value;
+  var container = document.getElementById('rcBtns');
+  container.innerHTML = '<span style="color:var(--sub)">경주 목록 확인 중...</span>';
+
+  var promises = [];
+  for(var i=1; i<=12; i++){
     (function(no){
       promises.push(
         fetch('/api/race?serviceKey='+encodeURIComponent(key)+'&meet='+meet+'&rc_date='+date+'&rc_no='+no+'&type=result')
-        .then(function(r){return r.json();})
-        .then(function(d){
-          var items=d&&d.response&&d.response.body?d.response.body.items:null;
-          if(!items||!items.item)return null;
-          return no;
-        })
-        .catch(function(){return null;})
+          .then(function(r){ return r.json(); })
+          .then(function(d){
+            var items = d && d.response && d.response.body ? d.response.body.items : null;
+            if(!items || !items.item) return null;
+            return no;
+          })
+          .catch(function(){ return null; })
       );
     })(i);
   }
-  var results=await Promise.all(promises);
-  var validRcNos=results.filter(function(n){return n!==null;});
-  if(validRcNos.length===0){
-    container.innerHTML='<span style="color:var(--sub)">해당 날짜 경주 없음 (경마 개최일 토·일 확인)</span>';
+  var results = await Promise.all(promises);
+  var valid = results.filter(function(n){ return n!==null; });
+  if(valid.length===0){
+    container.innerHTML = '<span style="color:var(--sub)">해당 날짜 경주 없음 (경마 개최일 토·일 확인)</span>';
     return;
   }
-  container.innerHTML=validRcNos.map(function(no){
+  container.innerHTML = valid.map(function(no){
     return '<button class="rc-btn" onclick="selectRcNo('+no+',this)">'+no+'경주</button>';
   }).join('');
 }
 
-function selectRcNo(no,el){
-  selectedRcNo=no;
-  document.querySelectorAll('.rc-btn').forEach(function(b){b.classList.remove('active');});
+function selectRcNo(no, el){
+  selectedRcNo = no;
+  document.querySelectorAll('.rc-btn').forEach(function(b){ b.classList.remove('active'); });
   el.classList.add('active');
 }
 
-// 과거 날짜 목록 생성 (최근 4주 토·일)
-function getRecentRaceDates(baseDate){
-  var dates=[];
-  var d=new Date(baseDate);
-  for(var i=1;i<=28;i++){
-    d.setDate(d.getDate()-1);
-    var day=d.getDay();
-    if(day===0||day===6){
-      var y=d.getFullYear();
-      var m=String(d.getMonth()+1).padStart(2,'0');
-      var dd=String(d.getDate()).padStart(2,'0');
-      dates.push(''+y+m+dd);
-    }
-    if(dates.length>=6)break;
-  }
-  return dates;
+async function fetchRaceData(){
+  var key = document.getElementById('apiKey').value.trim();
+  if(!key){ throw new Error('인증키 필요'); }
+  if(!selectedRcNo){ throw new Error('경주번호 선택 필요'); }
+  var date = document.getElementById('rdate').value.replace(/-/g,'');
+  var meet = document.getElementById('meet').value;
+
+  var res = await fetch('/api/race?serviceKey='+encodeURIComponent(key)+'&meet='+meet+'&rc_date='+date+'&rc_no='+selectedRcNo+'&type=result');
+  var data = await res.json();
+  var items = data && data.response && data.response.body ? data.response.body.items : null;
+  if(!items || !items.item) throw new Error('출주표 데이터 없음');
+  var list = Array.isArray(items.item) ? items.item : [items.item];
+
+  var first = list[0];
+  var info = {
+    date: date,
+    meet: MEETS[meet] || meet,
+    rcNo: selectedRcNo,
+    distance: first.rcDist || first.rc_dist || 1200,
+    n: list.length
+  };
+  return { items: list, info: info };
 }
 
-// 과거 데이터 수집 및 통계 계산
-async function collectHistoricalStats(key,meet,baseDate){
-  var dates=getRecentRaceDates(baseDate);
-  var allHorses=[];
+function runStatModel(items){
+  var scored = items.map(function(it){
+    var odds = parseFloat(it.winOdds || it.odds_val || it.win_odds || 0) || 99;
+    var prevOrd = parseFloat(it.prev_ord || it.ord || 99) || 99;
+    var rating = parseFloat(it.rating || it.rating_val || 50) || 50;
+    var sOdds = 1 / Math.max(odds, 0.1);
+    var sOrd = 1 / Math.max(prevOrd, 1);
+    var sRate = rating / 100;
+    var score = sOdds * 0.5 + sOrd * 0.3 + sRate * 0.2;
+    return {
+      hrName: it.hrName || it.horse_name || '미상',
+      chulNo: it.chulNo || it.chul_no || '-',
+      odds: odds,
+      prevOrd: prevOrd,
+      rating: rating,
+      score: score
+    };
+  });
+  var total = scored.reduce(function(a,b){ return a + b.score; }, 0) || 1;
+  scored.forEach(function(s){ s.prob = (s.score / total * 100); });
+  scored.sort(function(a,b){ return b.prob - a.prob; });
+  scored.forEach(function(s,i){ s.rank = i+1; });
+  return scored;
+}
 
-  for(var di=0;di<dates.length;di++){
-    var date=dates[di];
-    for(var rno=1;rno<=10;rno++){
-      try{
-        var res=await fetch('/api/rac
+function extractFeatures(item, distance){
+  var odds = parseFloat(item.winOdds || item.odds_val || item.win_odds || 0) || 0;
+  return {
+    odds_val: odds,
+    odds_grp: oddsGroup(odds),
+    rating_val: parseFloat(item.rating || item.rating_val || 0) || 0,
+    prev_ord: parseFloat(item.prev_ord || item.ord || 0) || 0,
+    prev_ord2: parseFloat(item.prev_ord2 || 0) || 0,
+    prev_ord3: parseFloat(item.prev_ord3 || 0) || 0,
+    avg_ord_3: parseFloat(item.avg_ord_3 || 0) || 0,
+    prev_odds: parseFloat(item.prev_odds || 0) || 0,
+    wg_change: parseFloat(item.wgChange || item.wg_change || 0) || 0,
+    chul_no: parseInt(item.chulNo || item.chul_no || 0) || 0,
+    rc_dist: parseFloat(distance) || 1200,
+    jk_winrate: parseFloat(item.jkWinRate || item.jk_winrate || 0) || 0,
+    tr_winrate: parseFloat(item.trWinRate || item.tr_winrate || 0) || 0,
+    wg_hr: parseFloat(item.wgHr || item.wg_hr || 0) || 0
+  };
+}
+
+function oddsGroup(odds){
+  if(odds <= 0) return 7;
+  if(odds < 3) return 1;
+  if(odds < 5) return 2;
+  if(odds < 8) return 3;
+  if(odds < 15) return 4;
+  if(odds < 30) return 5;
+  if(odds < 60) return 6;
+  return 7;
+}
+
+async function callMlApi(features){
+  var res = await fetch(ML_API + '/predict', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ features: features })
+  });
+  if(!res.ok) throw new Error('ML API 응답 오류 '+res.status);
+  var data = await res.json();
+  return data.win_probability;
+}
+
+async function runMlModel(items, distance){
+  var rows = [];
+  for(var i=0; i<items.length; i++){
+    var feat = extractFeatures(items[i], distance);
+    var prob = await callMlApi(feat);
+    rows.push({
+      hrName: items[i].hrName || items[i].horse_name || '미상',
+      chulNo: items[i].chulNo || items[i].chul_no || '-',
+      odds: feat.odds_val,
+      prevOrd: feat.prev_ord,
+      rating: feat.rating_val,
+      rawProb: prob,
+      features: feat
+    });
+  }
+  var sum = rows.reduce(function(a,b){ return a + b.rawProb; }, 0) || 1;
+  rows.forEach(function(r){ r.prob = r.rawProb / sum * 100; });
+  rows.sort(function(a,b){ return b.prob - a.prob; });
+  rows.forEach(function(r,i){ r.rank = i+1; });
+  return rows;
+}
+
+function showLoading(ttl, msg){
+  document.getElementById('lttl').textContent = ttl || '분석 중';
+  document.getElementById('lmsg').textContent = msg || '잠시만요...';
+  document.getElementById('ld').classList.add('on');
+}
+function hideLoading(){ document.getElementById('ld').classList.remove('on'); }
+function showError(msg){
+  var b = document.getElementById('errBox');
+  b.style.display = 'block';
+  b.textContent = '⚠ ' + msg;
+}
+function clearError(){ document.getElementById('errBox').style.display='none'; }
+
+function renderInfoBar(info){
+  var html = '';
+  html += '<div class="info-item"><div class="info-lbl">DATE</div><div class="info-val">'+info.date+'</div></div>';
+  html += '<div class="info-item"><div class="info-lbl">MEET</div><div class="info-val">'+info.meet+'</div></div>';
+  html += '<div class="info-item"><div class="info-lbl">RACE</div><div class="info-val">'+info.rcNo+'경주</div></div>';
+  html += '<div class="info-item"><div class="info-lbl">DISTANCE</div><div class="info-val">'+info.distance+'M</div></div>';
+  html += '<div class="info-item"><div class="info-lbl">HORSES</div><div class="info-val">'+info.n+'두</div></div>';
+  document.getElementById('ibar').innerHTML = html;
+}
+
+function renderHorseList(rows, containerId){
+  var maxProb = rows[0] ? rows[0].prob : 100;
+  var html = rows.map(function(r){
+    var cls = r.rank===1 ? 'r1' : r.rank===2 ? 'r2' : r.rank===3 ? 'r3' : 'ro';
+    var w = (r.prob / maxProb * 100).toFixed(0);
+    return ''
+      + '<div class="hcard '+cls+'">'
+      + '  <div class="rbadge">'+r.rank+'</div>'
+      + '  <div>'
+      + '    <div class="hname">'+escapeHtml(r.hrName)+'</div>'
+      + '    <div class="hmeta">'
+      + '      <span class="mi">번호 <span>'+r.chulNo+'</span></span>'
+      + '      <span class="mi">배당 <span>'+r.odds.toFixed(1)+'</span></span>'
+      + '      <span class="mi">직전 <span>'+(r.prevOrd||'-')+'위</span></span>'
+      + '      <span class="mi">레이팅 <span>'+(r.rating||'-')+'</span></span>'
+      + '    </div>'
+      + '  </div>'
+      + '  <div class="hprob">'
+      + '    <div class="pbar-w"><div class="pbar" style="width:'+w+'%"></div></div>'
+      + '    <div class="pval">'+r.prob.toFixed(1)+'<span style="font-size:14px">%</span></div>'
+      + '    <div class="plbl">우승 확률</div>'
+      + '  </div>'
+      + '</div>';
+  }).join('');
+  document.getElementById(containerId).innerHTML = html;
+}
+
+function renderOddsTable(rows){
+  var html = rows.slice().sort(function(a,b){ return a.odds-b.odds; }).map(function(r){
+    return '<tr><td>'+escapeHtml(r.hrName)+'</td><td>'+r.chulNo+'</td><td>'+(r.prevOrd||'-')+'</td><td>'+(r.rating||'-')+'</td><td>'+r.odds.toFixed(1)+'</td></tr>';
+  }).join('');
+  document.getElementById('oddsBody').innerHTML = html;
+}
+
+function renderInsightMl(rows){
+  if(!rows || rows.length===0) return;
+  var top = rows[0];
+  var snd = rows[1];
+  var diff = snd ? (top.prob - snd.prob).toFixed(1) : 0;
+  var msg = '<strong style="color:var(--green)">'+escapeHtml(top.hrName)+'</strong>을(를) 1위로 예측합니다 ('+top.prob.toFixed(1)+'%). ';
+  msg += '2위 예측 '+escapeHtml(snd ? snd.hrName : '')+'와(과)의 격차는 '+diff+'%p입니다. ';
+  msg += '본 예측은 배당·레이팅·직전 순위·기수/조교사 승률 등 14개 피처를 XGBoost 모델에 입력해 산출했습니다. ';
+  msg += '<span style="color:var(--sub);font-size:11px">⚠ 공공API에서 일부 피처(과거 3경주 평균, 마체중 변화 등)가 제공되지 않을 경우 0으로 입력되어 정확도가 다소 떨어질 수 있습니다.</span>';
+  document.getElementById('insightMl').innerHTML = msg;
+}
+
+function renderCompare(stat, ml){
+  var statMap = {}; stat.forEach(function(s){ statMap[s.hrName] = s.rank; });
+  var mlMap = {}; ml.forEach(function(m){ mlMap[m.hrName] = m.rank; });
+  var names = stat.map(function(s){ return s.hrName; });
+  var html = names.map(function(n){
+    var sr = statMap[n] || '-';
+    var mr = mlMap[n] || '-';
+    var agree = sr === mr ? '✓' : (Math.abs(sr-mr) <= 1 ? '≈' : '✗');
+    var rowCls = sr === mr ? 'agree' : '';
+    return '<tr class="'+rowCls+'"><td>'+escapeHtml(n)+'</td><td style="text-align:center" class="pos">'+sr+'위</td><td style="text-align:center" class="pos-ml">'+mr+'위</td><td style="text-align:right">'+agree+'</td></tr>';
+  }).join('');
+  document.getElementById('cmpBody').innerHTML = html;
+}
+
+function showTab(which){
+  document.getElementById('paneStat').style.display = (which==='stat') ? '' : 'none';
+  document.getElementById('paneMl').style.display = (which==='ml') ? '' : 'none';
+  document.getElementById('paneCmp').style.display = (which==='cmp') ? '' : 'none';
+  document.getElementById('tabStat').classList.toggle('active', which==='stat');
+  document.getElementById('tabMl').classList.toggle('active', which==='ml');
+  document.getElementById('tabCmp').classList.toggle('active', which==='cmp');
+}
+
+function escapeHtml(s){
+  if(s==null) return '';
+  return String(s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+async function runStat(){
+  clearError();
+  try{
+    showLoading('통계 예측 실행 중', '출주표 가져오는 중...');
+    var rd = await fetchRaceData();
+    lastRaceData = rd;
+    lastStat = runStatModel(rd.items);
+    renderInfoBar(rd.info);
+    renderHorseList(lastStat, 'hlistStat');
+    renderOddsTable(lastStat);
+    document.getElementById('empty').style.display = 'none';
+    document.getElementById('results').style.display = '';
+    showTab('stat');
+    updateCmpTab();
+  } catch(e){
+    showError(e.message);
+  } finally {
+    hideLoading();
+  }
+}
+
+async function runMl(){
+  clearError();
+  try{
+    showLoading('XGBoost 예측 실행 중', 'Render API 호출 중... (최초 50초 소요 가능)');
+    var rd = await fetchRaceData();
+    lastRaceData = rd;
+    document.getElementById('lmsg').textContent = 'XGBoost 모델 추론 중...';
+    lastMl = await runMlModel(rd.items, rd.info.distance);
+    if(!lastStat) lastStat = runStatModel(rd.items);
+    renderInfoBar(rd.info);
+    renderHorseList(lastMl, 'hlistMl');
+    renderHorseList(lastStat, 'hlistStat');
+    renderOddsTable(lastMl);
+    renderInsightMl(lastMl);
+    document.getElementById('empty').style.display = 'none';
+    document.getElementById('results').style.display = '';
+    showTab('ml');
+    updateCmpTab();
+  } catch(e){
+    showError('XGBoost 예측 실패: ' + e.message + ' (백엔드가 잠자기 중이면 새로고침 후 30~50초 뒤 재시도하세요)');
+  } finally {
+    hideLoading();
+  }
+}
+
+function updateCmpTab(){
+  if(lastStat && lastMl){
+    document.getElementById('tabCmp').style.display = '';
+    renderCompare(lastStat, lastMl);
+  }
+}
+</script>
+</body>
+</html>
