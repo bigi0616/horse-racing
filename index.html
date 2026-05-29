@@ -181,7 +181,7 @@ select option{background:#13131E;}
     <div id="paneMl" style="display:none">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
         <div><div class="stitle" style="color:var(--green)">XGBoost ML PREDICTION</div><div class="sheading" style="margin-bottom:0;font-size:18px">머신러닝 우승 확률</div></div>
-        <span style="margin-left:auto;font-size:10px;color:var(--green);padding:3px 8px;background:rgba(74,200,100,.08);border:1px solid rgba(74,200,100,.3);border-radius:2px">AUC 0.7972</span>
+        <span style="margin-left:auto;font-size:10px;color:var(--green);padding:3px 8px;background:rgba(74,200,100,.08);border:1px solid rgba(74,200,100,.3);border-radius:2px">모델A AUC 0.7087</span>
       </div>
       <div class="horse-list" id="hlistMl"></div>
       <div class="pcard"><div class="ptitle ml">XGBOOST INSIGHT</div><div id="insightMl" style="font-size:13px;line-height:1.8;color:var(--sub)"></div></div>
@@ -360,14 +360,27 @@ function oddsGroup(odds){
 }
 
 async function callMlApi(features){
-  var res = await fetch(ML_API + '/predict', {
+  var horse = {
+    hrName:     '',
+    rating_val: features.rating_val,
+    prev_ord:   features.prev_ord,
+    prev_ord2:  features.prev_ord2,
+    prev_ord3:  features.prev_ord3,
+    avg_ord_3:  features.avg_ord_3,
+    prev_odds:  features.prev_odds,
+    chul_no:    features.chul_no,
+    rc_dist:    features.rc_dist,
+    jk_winrate: features.jk_winrate,
+    tr_winrate: features.tr_winrate
+  };
+  var res = await fetch(ML_API + '/predict_v3', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ features: features })
+    body: JSON.stringify({ horses: [horse] })
   });
   if(!res.ok) throw new Error('ML API 응답 오류 '+res.status);
   var data = await res.json();
-  return data.win_probability;
+  return data.predictions[0].win_prob_pct;
 }
 
 async function runMlModel(items, distance){
@@ -456,7 +469,7 @@ function renderInsightMl(rows){
   var diff = snd ? (top.prob - snd.prob).toFixed(1) : 0;
   var msg = '<strong style="color:var(--green)">'+escapeHtml(top.hrName)+'</strong>을(를) 1위로 예측합니다 ('+top.prob.toFixed(1)+'%). ';
   msg += '2위 예측 '+escapeHtml(snd ? snd.hrName : '')+'와(과)의 격차는 '+diff+'%p입니다. ';
-  msg += '본 예측은 배당·레이팅·직전 순위·기수/조교사 승률 등 14개 피처를 XGBoost 모델에 입력해 산출했습니다. ';
+  msg += '본 예측은 레이팅·직전 순위·기수/조교사 승률 등 10개 피처를 XGBoost 모델 A에 입력해 산출했습니다. (배당 미사용, 실시간 예측 최적화)';
   msg += '<span style="color:var(--sub);font-size:11px">⚠ 공공API에서 일부 피처(과거 3경주 평균, 마체중 변화 등)가 제공되지 않을 경우 0으로 입력되어 정확도가 다소 떨어질 수 있습니다.</span>';
   document.getElementById('insightMl').innerHTML = msg;
 }
