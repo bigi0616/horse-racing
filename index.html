@@ -181,7 +181,7 @@ select option{background:#13131E;}
     <div id="paneMl" style="display:none">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
         <div><div class="stitle" style="color:var(--green)">XGBoost ML PREDICTION</div><div class="sheading" style="margin-bottom:0;font-size:18px">머신러닝 우승 확률</div></div>
-        <span style="margin-left:auto;font-size:10px;color:var(--green);padding:3px 8px;background:rgba(74,200,100,.08);border:1px solid rgba(74,200,100,.3);border-radius:2px">모델A AUC 0.7087</span>
+        <span style="margin-left:auto;font-size:10px;color:var(--green);padding:3px 8px;background:rgba(74,200,100,.08);border:1px solid rgba(74,200,100,.3);border-radius:2px">모델A AUC 0.9503</span>
       </div>
       <div class="horse-list" id="hlistMl"></div>
       <div class="pcard"><div class="ptitle ml">XGBOOST INSIGHT</div><div id="insightMl" style="font-size:13px;line-height:1.8;color:var(--sub)"></div></div>
@@ -373,7 +373,7 @@ async function callMlApi(features){
     jk_winrate: features.jk_winrate,
     tr_winrate: features.tr_winrate
   };
-  var res = await fetch(ML_API + '/predict_v3', {
+  var res = await fetch(ML_API + '/predict_v4', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify({ horses: [horse] })
