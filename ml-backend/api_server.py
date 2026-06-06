@@ -27,6 +27,12 @@ with open(os.path.join(BASE_DIR, "mashin_model_v3_no_odds.pkl"), "rb") as f:
 MODEL_A      = v3["model"]
 FEATURES_A   = v3["features"]
 
+with open(os.path.join(BASE_DIR, "mashin_model_v4.pkl"), "rb") as f:
+    v4 = pickle.load(f)
+MODEL_V4     = v4["model"]
+FEATURES_V4  = v4["features"]
+
+
 # ── 스키마 ─────────────────────────────────────────────
 class Horse(BaseModel):
     hrName:     str
@@ -68,7 +74,7 @@ def predict_with(model, features, horses):
 # ── 엔드포인트 ─────────────────────────────────────────
 @app.get("/health")
 def health():
-    return {"status": "ok", "models": ["v2(B)", "v3(A)"]}
+    return {"status": "ok", "models": ["v2(B)", "v3(A)", "v4"]}
 
 @app.get("/features")
 def features_b():
@@ -92,3 +98,8 @@ def predict_a(req: RaceRequest):
 def predict_csv_b(req: RaceRequest):
     """모델 B CSV 검증용 (하위 호환)"""
     return predict_b(req)
+    
+@app.post("/predict_v4")
+def predict_v4(req: RaceRequest):
+    """모델 v4 (신규 피처 포함) — 메인 서빙용"""
+    return {"model": "v4", "predictions": predict_with(MODEL_V4, FEATURES_V4, req.horses)}
